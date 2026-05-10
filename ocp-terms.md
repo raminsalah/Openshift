@@ -214,7 +214,57 @@
 
 26. ServiceAccount token automounting
 
-27. All checks
+27. Ingress
+- The actual application container/pod can be nginx but Pods are temporary/ephemeral and unstable. They die, they restart, they change IPs...
+- A Service exposes Pods INSIDE the cluster and gives stable DNS name, stable IP and load balancing to Pods like myapp.security-lab.svc.cluster.local so that Other Pods can access it.
+- Route or Ingress exposes the Service OUTSIDE the cluster. 
+      - Ingress is a Kubernetes API object that controls external HTTP/HTTPS access to services
+      - It acts like an application-aware reverse proxy / traffic router.
+
+            Internet
+                ↓
+            Ingress Controller  (The Ingress Controller is the actual router/proxy component and usually runs HAProxy pods)
+                ↓
+            Ingress
+                ↓
+            Service
+                ↓
+            Pods
+
+apiVersion: v1
+kind: Service
+metadata:
+name: nginx-service
+namespace: security-lab
+spec:
+selector:
+    app: ingress-demo
+ports:
+- port: 8080
+    targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-demo
+  namespace: security-lab
+spec:
+  tls:
+  - hosts:
+    - ingress-demo.apps-crc.testing
+  rules:
+  - host: ingress-demo.apps-crc.testing
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 8080
+
+28. All checks
 kubeadmin bound to cluster-admin
 non-system cluster-admin subjects
 ClusterRole wildcard permissions
