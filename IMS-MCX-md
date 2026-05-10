@@ -1,0 +1,169 @@
+┌───────────────────────┐
+│   MCPTT Client        │
+│ (phone / train radio) │
+└─────────┬─────────────┘
+          │
+          │ 1) SIP REGISTER
+          ▼
+┌──────────────────────────────┐
+│ IMS Core (Kamailio)          │
+│ P-CSCF / I-CSCF / S-CSCF     │
+└─────────┬────────────────────┘
+          │
+          │ Diameter (auth, profile)
+          ▼
+┌──────────────────────────────┐
+│ HSS / UDM                    │
+│ (subscriber database)        │
+└──────────────────────────────┘
+
+✔ User is now registered in IMS
+
+────────────────────────────────────────
+
+        🚨 USER PRESSES PTT 🚨
+
+┌───────────────────────┐
+│   MCPTT Client        │
+└─────────┬─────────────┘
+          │
+          │ 2) SIP INVITE (group call)
+          ▼
+┌──────────────────────────────┐
+│ IMS Core (Kamailio)          │
+└─────────┬────────────────────┘
+          │
+          │ routes request
+          ▼
+┌──────────────────────────────┐
+│ MCPTT Application Server     │
+│ (MCX logic)                  │
+└─────────┬────────────────────┘
+          │
+          │ 3) Floor control
+          │ (who can speak)
+          ▼
+     [Speaker approved]
+
+────────────────────────────────────────
+
+          │
+          │ 4) Invite group members
+          ▼
+┌──────────────────────────────┐
+│ IMS Core (Kamailio)          │
+└─────────┬────────────────────┘
+          │
+          ├────────► User A
+          ├────────► User B
+          └────────► User C
+
+✔ Group session established
+
+────────────────────────────────────────
+
+🎤 MEDIA (VOICE)
+
+┌───────────────────────┐
+│ Active Speaker        │
+└─────────┬─────────────┘
+          │
+          │ RTP (voice stream)
+          ▼
+┌──────────────────────────────┐
+│ RTP Engine / Media Proxy     │
+└─────────┬────────────────────┘
+          │
+          ├────────► User A
+          ├────────► User B
+          └────────► User C
+
+✔ Everyone hears the speaker
+
+────────────────────────────────────────
+
+🔄 DURING CALL
+
+- Other users press PTT  
+- MCPTT server switches speaker (floor control)  
+- RTP stream changes source  
+
+────────────────────────────────────────
+❌ CALL END
+
+MCPTT Client
+   │
+   │ 5) SIP BYE
+   ▼
+IMS Core → MCPTT Server → all users
+
+✔ Session ends  
+✔ RTP stops  
+───────────────────────────────────────
+
+
+
+1) IMS Core (based on Kamailio as open-source SIP (Session Integration Protocol) engine/server/proxy)
+Includes IMS functions:
+P-CSCF / I-CSCF / S-CSCF
+SIP routing, registration, call control
+Reality:
+Companies like Kontron:
+Customize it
+Integrate it
+Add telecom features (security, scaling, HA)
+👉 They usually don’t build IMS from scratch, but:
+✔ adapt
+✔ extend
+✔ productize it
+
+2) MCX(Misssion Critical Systems) / MCPTT-MCData-MCVideo (like Walkie-talkie over LTE runs on top of IMS)
+This is their core product.
+They build:
+MCPTT server (push-to-talk logic)
+Group communication
+Floor control
+Priority / emergency handling
+Dispatcher integration
+MCData / MCVideo services
+👉 This is 100% custom telecom software
+✔ This is where most engineering effort goes
+✔ This is what differentiates vendors
+
+3) RTP(Real-time Transport Protocol) / Media handling
+Includes:
+RTP engine / proxy
+Media routing, duplication, recording
+Reality:
+Often:
+Open-source (RTPengine)
+Or third-party vendor
+Companies like Kontron:
+Integrate it
+Configure it
+Connect it with MCPTT logic
+👉 Usually not fully developed by them
+
+4) HSS (Home Subscriber Server) / Subscriber database = Phonebook
+Includes:
+User profiles
+Authentication
+Permissions
+Reality:
+Sometimes:
+Third-party
+OR built-in lightweight version
+👉 Kontron may:
+✔ integrate
+✔ sometimes provide their own simplified version
+
+5) Signaling → handled by "SIP" Session Initiation Protocol
+   Media(audio/video) → handled by "RTP" Real-time Transport Protocol
+   Authentication/Authorization → handled by "HSS" Home Subscriber Server
+   Service control/orchestration → handled by "IMS" IP Multimedia Subsystem
+SIP = “set up the call”
+RTP = “carry the voice”
+HSS = “who are you?”
+IMS = “run the service”
+MCX = “special mission-critical features”
+LTE/5G = “the road everything travels on”
