@@ -230,7 +230,7 @@
             Service
                 ↓
             Pods
-
+``` yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -263,6 +263,7 @@ spec:
             name: nginx-service
             port:
               number: 8080
+```
 
 28. All checks
 kubeadmin bound to cluster-admin
